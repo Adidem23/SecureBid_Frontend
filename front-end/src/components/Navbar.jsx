@@ -13,7 +13,7 @@ const Navbar = (props) => {
         (props.isAdmin) ? 
           <>
             <li className={(isActive) ? "active nav-item": "nav-item"}>
-                <NavLink className="nav-link" exact activeClassName="active" to="/admin/">Register Land<span className="sr-only">(current)</span></NavLink>
+                <NavLink className="nav-link" exact activeClassName="active" to="/admin/">Create Tender<span className="sr-only">(current)</span></NavLink>
             </li>
             <li className="nav-item">
                 <NavLink className="nav-link" exact activeClassName="active" to="/admin/userprofile" onClick={() => setActive(false)}>Profile</NavLink>
@@ -31,13 +31,10 @@ const Navbar = (props) => {
                 <NavLink className="nav-link" exact activeClassName="active" to="/userprofile/">Profile<span className="sr-only">(current)</span></NavLink>
             </li>
             <li className="nav-item">
-                <NavLink className="nav-link" exact activeClassName="active" to="/userprofile/property" onClick={() => setActive(false)}>Property</NavLink>
+                <NavLink className="nav-link" exact activeClassName="active" to="/userprofile/property" onClick={() => setActive(false)}>Assigned Tenders</NavLink>
             </li>
             <li className="nav-item">
-                <NavLink className="nav-link" exact activeClassName="active" to="/userprofile/requests" onClick={() => setActive(false)}>Requests</NavLink>
-            </li>
-            <li className="nav-item">
-                <NavLink className="nav-link" exact activeClassName="active" to="/userprofile/requested" onClick={() => setActive(false)}>Requested</NavLink>
+                <NavLink className="nav-link" exact activeClassName="active" to="/userprofile/requested" onClick={() => setActive(false)}>Applied Tenders</NavLink>
             </li>
             <li className="nav-item">
                 <NavLink className="nav-link" exact activeClassName="active" to="/userprofile/exploreAll" onClick={() => setActive(false)}>Explore</NavLink>

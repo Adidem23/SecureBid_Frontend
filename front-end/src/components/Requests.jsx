@@ -12,17 +12,17 @@ const Requests = (props) => {
   const reqArr = [];
 
   useEffect(() => {
-    const getRequests = async () =>{
-      const _indices = await contract.getIndices({from: account});
+    const getRequests = async () => {
+      const _indices = await contract.getIndices({ from: account });
       const _totalIndices = _indices[0].words[0];
 
-      for(let i=0; i<_totalIndices; i++){
-        const ownerOwns = await contract.getOwnerOwns(i, {from: account});  // returns object
-        
-        // if survey no. != 0
-        if(ownerOwns[3].words[0] != 0){
+      for (let i = 0; i < _totalIndices; i++) {
+        const ownerOwns = await contract.getOwnerOwns(i, { from: account });  // returns object
 
-          const reqCnt_propId = await contract.getRequestCnt_propId(ownerOwns[0], ownerOwns[1], ownerOwns[2], ownerOwns[3].words[0],{
+        // if survey no. != 0
+        if (ownerOwns[3].words[0] != 0) {
+
+          const reqCnt_propId = await contract.getRequestCnt_propId(ownerOwns[0], ownerOwns[1], ownerOwns[2], ownerOwns[3].words[0], {
             from: account
           })
 
@@ -31,9 +31,9 @@ const Requests = (props) => {
           const noOfRequests = reqCnt_propId[0].words[0];
           const propertyId = reqCnt_propId[1].words[0];
 
-          if(noOfRequests > 0){
+          if (noOfRequests > 0) {
 
-            for(let j = 0; j<noOfRequests; j++){
+            for (let j = 0; j < noOfRequests; j++) {
 
               const requester = await contract.getRequesterDetail(ownerOwns[0], ownerOwns[1], ownerOwns[2], ownerOwns[3].words[0], j, {
                 from: account
@@ -42,17 +42,26 @@ const Requests = (props) => {
               const requesterName = await contract.getRequesterName(ownerOwns[0], ownerOwns[1], ownerOwns[2], ownerOwns[3].words[0], j, {
                 from: account
               })
-              console.log(typeof(requesterName))
+              console.log(typeof (requesterName))
 
               const requesterBidAmount = await contract.getRequesterBidAmount(ownerOwns[0], ownerOwns[1], ownerOwns[2], ownerOwns[3].words[0], j, {
                 from: account
               })
 
-              console.log(typeof(requesterBidAmount))
-
               const stringBidAmount = parseFloat(requesterBidAmount)
-    
-              const reqDetails = {state: ownerOwns[0], district: ownerOwns[1], city: ownerOwns[2], surveyNo: ownerOwns[3].words[0], index: i, reqNo: j, requesterName:requesterName,stringBidAmount: stringBidAmount, requester, propertyId}
+
+              const requesterFileURI = await contract.getRequesterFileURI(ownerOwns[0], ownerOwns[1], ownerOwns[2], ownerOwns[3].words[0], j, {
+                from: account
+              });
+
+              const landDetails = await contract.getLandDetails('M', 'N', 'Y',ownerOwns[3], {
+                from: account
+              });
+
+              const tendorName = landDetails[4];
+
+
+              const reqDetails = { state: ownerOwns[0], district: ownerOwns[1], city: ownerOwns[2], surveyNo: ownerOwns[3].words[0], index: i, reqNo: j, requesterName: requesterName, stringBidAmount: stringBidAmount, requesterFileURI: requesterFileURI, requester, propertyId , tendorName:tendorName}
               console.log("below reqdetails.............")
               reqArr.push(reqDetails);
 
@@ -73,39 +82,41 @@ const Requests = (props) => {
   }, [reload])
 
   const handleAcceptReq = async (_index, _reqNo) => {
-      await contract.AcceptRequest(_index, _reqNo, {from: account, gas: 2000000});
-      setReload(!reload);
+    await contract.AcceptRequest(_index, _reqNo, { from: account, gas: 2000000 });
+    setReload(!reload);
   }
 
   return (
     <div className='container'>
-      {  
-        (length == 0) ? 
-        <div className="no-result-div">
-          <p className='no-result'>No incoming requests.</p>
-        </div>
-        :
-          requestList.map((details, index) =>{
-            return(
+      {
+        (length == 0) ?
+          <div className="no-result-div">
+            <p className='no-result'>No incoming requests.</p>
+          </div>
+          :
+          requestList.map((details, index) => {
+            return (
               <DisplayRequests
-                 
-                key = {index}
-                propertyId = {details.propertyId}
-                requester = {details.requester}
-                requesterName = {details.requesterName}
-                stringBidAmount = {details.stringBidAmount}
-                index = {details.index}
-                reqNo = {details.reqNo}
-                state = {details.state}
-                district = {details.district}
-                city = {details.city}
-                surveyNo = {details.surveyNo}
-                acceptReq = {handleAcceptReq}
-    
+
+                key={index}
+                propertyId={details.propertyId}
+                requester={details.requester}
+                requesterName={details.requesterName}
+                requesterFileURI={details.requesterFileURI}
+                tendorName={details.tendorName}
+                stringBidAmount={details.stringBidAmount}
+                index={details.index}
+                reqNo={details.reqNo}
+                state={details.state}
+                district={details.district}
+                city={details.city}
+                surveyNo={details.surveyNo}
+                acceptReq={handleAcceptReq}
+
               />
             )
           })
-        } 
+      }
     </div>
   )
 }

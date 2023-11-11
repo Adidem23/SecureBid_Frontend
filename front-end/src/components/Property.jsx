@@ -60,7 +60,7 @@ const Property = (props) => {
         {  
         (length == 0) ? 
         <div className="no-result-div">
-          <p className='no-result'>No properties found :(</p>
+          <p className='no-result'>No Owned Tenders found :(</p>
         </div>
         :
           landDetailList.map((details, index) =>{

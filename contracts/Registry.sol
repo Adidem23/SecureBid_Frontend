@@ -42,8 +42,6 @@ contract Registry {
         uint256 noOfRequests; // other users requested to this land
     }
 
-
-
     struct UserProfile {
         address userAddr;
         string fullName;
@@ -81,6 +79,7 @@ contract Registry {
         address whoRequested;
         uint256 reqIndex;
         uint256 BidAmount;
+        string FileURI;
     }
 
     mapping(address => Admin) public admins;
@@ -241,7 +240,7 @@ contract Registry {
         newLandRegistry.markAvailable = true;
         newLandRegistry.tenderName = _tenderName;
         newLandRegistry.tendertype = _tendertype;
-        newLandRegistry.ipfsuri =_ipfsuri;
+        newLandRegistry.ipfsuri = _ipfsuri;
 
         newOwnerOwns.surveyNumber = totalTendors;
         newOwnerOwns.state = _state;
@@ -294,7 +293,8 @@ contract Registry {
         string memory _district,
         string memory _city,
         uint256 _surveyNo,
-        uint256 _BidAmount
+        uint256 _BidAmount,
+        string memory _FileURI
     ) external {
         LandDetails storage thisLandDetail = landDetalsMap[_state][_district][
             _city
@@ -310,6 +310,7 @@ contract Registry {
             msg.sender
         ].requestIndices;
         thisLandDetail.requests[req_serialNum].BidAmount = _BidAmount;
+        thisLandDetail.requests[req_serialNum].FileURI = _FileURI;
         thisLandDetail.noOfRequests++;
 
         // adding requested land to user_2 profile
@@ -333,9 +334,9 @@ contract Registry {
         string memory _city = ownerMapsProperty[msg.sender][_index].city;
 
         // updating LandDetails
-        address newOwner = landDetalsMap[_state][_district][_city][
-            _surveyNo
-        ].requests[_reqNo].whoRequested;
+        address newOwner = landDetalsMap[_state][_district][_city][_surveyNo]
+            .requests[_reqNo]
+            .whoRequested;
 
         uint256 newOwner_reqIndex = landDetalsMap[_state][_district][_city][
             _surveyNo
@@ -402,7 +403,7 @@ contract Registry {
             uint256,
             string memory,
             string memory,
-            string memory 
+            string memory
         )
     {
         address owner = landDetalsMap[_state][_district][_city][_surveyNo]
@@ -414,16 +415,19 @@ contract Registry {
         uint256 mv = landDetalsMap[_state][_district][_city][_surveyNo]
             .marketValue;
 
-        string  memory tendorName= landDetalsMap[_state][_district][_city][_surveyNo]
-            .tenderName;
+        string memory tendorName = landDetalsMap[_state][_district][_city][
+            _surveyNo
+        ].tenderName;
 
-        string memory tendortype= landDetalsMap[_state][_district][_city][_surveyNo]
-            .tendertype;
+        string memory tendortype = landDetalsMap[_state][_district][_city][
+            _surveyNo
+        ].tendertype;
 
-        string memory ipfsuri= landDetalsMap[_state][_district][_city][_surveyNo]
-            .ipfsuri;
-        
-        return (owner, propertyid, indx, mv,tendorName,tendortype,ipfsuri);
+        string memory ipfsuri = landDetalsMap[_state][_district][_city][
+            _surveyNo
+        ].ipfsuri;
+
+        return (owner, propertyid, indx, mv, tendorName, tendortype, ipfsuri);
     }
 
     function getRequestCnt_propId(
@@ -446,13 +450,7 @@ contract Registry {
         string memory _city,
         uint256 _surveyNo,
         uint256 _reqIndex
-    )
-        external
-        view
-        returns (
-            address
-        )
-    {
+    ) external view returns (address) {
         address requester = landDetalsMap[_state][_district][_city][_surveyNo]
             .requests[_reqIndex]
             .whoRequested;
@@ -466,19 +464,26 @@ contract Registry {
         string memory _city,
         uint256 _surveyNo,
         uint256 _reqIndex
-    )
-        external
-        view
-        returns (
-            uint256
-        )
-    {
-
+    ) external view returns (uint256) {
         uint256 BidAmount = landDetalsMap[_state][_district][_city][_surveyNo]
             .requests[_reqIndex]
             .BidAmount;
 
         return (BidAmount);
+    }
+
+    function getRequesterFileURI(
+        string memory _state,
+        string memory _district,
+        string memory _city,
+        uint256 _surveyNo,
+        uint256 _reqIndex
+    ) external view returns (string memory) {
+        string memory RequesterFileURI = landDetalsMap[_state][_district][
+            _city
+        ][_surveyNo].requests[_reqIndex].FileURI;
+
+        return (RequesterFileURI);
     }
 
     function getRequesterName(
@@ -487,17 +492,11 @@ contract Registry {
         string memory _city,
         uint256 _surveyNo,
         uint256 _reqIndex
-    )
-        external
-        view
-        returns (
-            string memory
-        )
-    {
+    ) external view returns (string memory) {
         address requester = landDetalsMap[_state][_district][_city][_surveyNo]
             .requests[_reqIndex]
             .whoRequested;
-        
+
         string memory NameofRequester = userProfile[requester].fullName;
         return (NameofRequester);
     }
@@ -513,15 +512,12 @@ contract Registry {
         return (available);
     }
 
-    function getOwnerOwns(uint256 indx)
+    function getOwnerOwns(
+        uint256 indx
+    )
         external
         view
-        returns (
-            string memory,
-            string memory,
-            string memory,
-            uint256
-        )
+        returns (string memory, string memory, string memory, uint256)
     {
         uint256 surveyNo = ownerMapsProperty[msg.sender][indx].surveyNumber;
         string memory state = ownerMapsProperty[msg.sender][indx].state;
@@ -531,15 +527,12 @@ contract Registry {
         return (state, district, city, surveyNo);
     }
 
-    function getAdminOwns(uint256 indx)
+    function getAdminOwns(
+        uint256 indx
+    )
         external
         view
-        returns (
-            string memory,
-            string memory,
-            string memory,
-            uint256
-        )
+        returns (string memory, string memory, string memory, uint256)
     {
         uint256 surveyNo = adminMapsProperty[msg.sender][indx].surveyNo;
         string memory state = adminMapsProperty[msg.sender][indx].state;
@@ -549,15 +542,12 @@ contract Registry {
         return (state, district, city, surveyNo);
     }
 
-    function getRequestedLands(uint256 indx)
+    function getRequestedLands(
+        uint256 indx
+    )
         external
         view
-        returns (
-            string memory,
-            string memory,
-            string memory,
-            uint256
-        )
+        returns (string memory, string memory, string memory, uint256)
     {
         uint256 surveyNo = requestedLands[msg.sender][indx].surveyNumber;
         string memory state = requestedLands[msg.sender][indx].state;
@@ -587,25 +577,17 @@ contract Registry {
         return (fullName, gender, email, contact, residentialAddr);
     }
 
-     function getUserName(address _addr)
-        external
-        view
-        returns (
-            string memory
-        )
-    {
+    function getUserName(address _addr) external view returns (string memory) {
         string memory fullName = userProfile[_addr].fullName;
 
         return (fullName);
     }
 
-    function getestablishYear(address _addr)
-        external
-        view
-        returns (
-            string memory
-        )
-    {
+    
+
+    function getestablishYear(
+        address _addr
+    ) external view returns (string memory) {
         string memory year = vendors[_addr].year;
 
         return (year);
@@ -640,9 +622,7 @@ contract Registry {
         return (false);
     }
 
-    function getTotalTendors()
-    external view returns(uint256)
-    {
-        return(totalTendors);
+    function getTotalTendors() external view returns (uint256) {
+        return (totalTendors);
     }
 }

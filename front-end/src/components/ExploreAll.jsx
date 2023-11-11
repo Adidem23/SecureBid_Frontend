@@ -18,7 +18,7 @@ const ExploreAll = (props) => {
     })
 
     const [landDetail, setLandDetail] = useState({
-        owner: "", propertyId: "", index: "", marketValue: "", didIRequested: ""
+        owner: "", propertyId: "", index: "", marketValue: "", didIRequested: "", OwnerName: "" , tendorName:"",tendortype:"", ipfsuri:""
     })
 
     const [didIRequested, setDidIRequested] = useState(false);
@@ -36,22 +36,24 @@ const ExploreAll = (props) => {
 
     console.log("Line 36")
 
-    const handlerequestForBuy = async (_surveyNo,_BidAmount) => {
-        console.log("Survey Number"+_surveyNo)
-        console.log(typeof(_surveyNo))
-        await contract.RequestForBuy('M', 'N', 'Y', _surveyNo, _BidAmount, {
+    const handlerequestForBuy = async (_surveyNo, _BidAmount, _FileURI) => {
+        console.log("Survey Number" + _surveyNo)
+        console.log(typeof (_surveyNo))
+        await contract.RequestForBuy('M', 'N', 'Y', _surveyNo, _BidAmount, _FileURI, {
             from: account
         })
-        myArray[_surveyNo-1000]=true
+        myArray[_surveyNo - 1000] = true
         setDidIRequested(true);
-        
+
     }
+
+
 
     useEffect(() => {
         const getRequests = async () => {
             // const _indices = await contract.getIndices({from: account});
             const _totalTendors = await contract.getTotalTendors({ from: account });
-            
+
             //const _totalIndices = _indices[0].words[0];
             console.log("Line 54")
 
@@ -77,33 +79,40 @@ const ExploreAll = (props) => {
                             const _didIRequested = await contract.didIRequested('M', 'N', 'Y', j, {
                                 from: account
                             })
-                            myArray[j-1000]=_didIRequested;
+                            myArray[j - 1000] = _didIRequested;
                             setDidIRequested(_didIRequested);
                         }
                     }
 
-                    
+
                     const propertyId = landDetails[1].words[0]
                     const index = landDetails[2].words[0]
                     const marketValue = landDetails[3].words[0]
+                   const tendorName = landDetails[4]
+                    const tendortype = landDetails[5]
+                    const ipfsuri = landDetails[6]
                     const surveyNo = j
 
-                    console.log("Line 75")
+                    const OwnerName = await contract.getUserName(landDetails[0]);
 
                     const reqDetails = {
                         owner: landDetails[0],
+                        OwnerName: OwnerName,
+                        tendortype:tendortype,
+                        tendorName:tendorName,
+                        ipfsuri:ipfsuri,
                         propertyId: landDetails[1].words[0],
                         index: landDetails[2].words[0],
                         indexj: j,
                         marketValue: landDetails[3].words[0],
                         surveyNo: j,
-                        didIRequested: myArray[j-1000]
+                        didIRequested: myArray[j - 1000]
                     }
                     console.log("below reqdetails.............")
                     reqArr.push(reqDetails);
-                    
 
-                    setLandDetail({ owner, propertyId, index, marketValue, surveyNo, didIRequested })
+
+                    setLandDetail({ owner, OwnerName,tendorName,tendortype,ipfsuri,propertyId, index, marketValue, surveyNo, didIRequested })
                     setAvailable(isAvaliable);
                     setNoResult(1);
 
@@ -127,10 +136,10 @@ const ExploreAll = (props) => {
         setReload(!reload);
     }
 
-    
+
 
     return (
-        <div className='container'> 
+        <div className='container'>
             {
                 (length == 0) ?
                     <div className="no-result-div">
@@ -142,6 +151,10 @@ const ExploreAll = (props) => {
                             <DisplayExploreResult
 
                                 owner={landDetail.owner}
+                                OwnerName={landDetail.OwnerName}
+                                tendorName={landDetail.tendorName}
+                                tendortype={landDetail.tendortype}
+                                ipfsuri={landDetail.ipfsuri}
                                 propertyId={landDetail.propertyId}
                                 surveyNo={landDetail.surveyNo}
                                 marketValue={landDetail.marketValue}
